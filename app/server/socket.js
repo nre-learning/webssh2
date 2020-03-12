@@ -109,7 +109,18 @@ function getValidatedRequestConfig (queryParams) {
   return config
 }
 
-function getCredentials (session) {
+function getCredentials (query, session) {
+
+  // TODO(mierdin): I couldn't get basicAuth to work. Even adding log statements did nothing.
+  // There's clearly something I'm missing/not understanding.
+  // In the meantime, I am just passing username and password via query params.
+  if (query.username && query.userpassword) {
+    return {
+      username: query.username,
+      userpassword: query.userpassword
+    }
+  }
+
   if (session.username && session.userpassword) {
     return {
       username: session.username,
@@ -178,7 +189,7 @@ function SSHError (callerName, err, { socket, credentials, socketConfig }) {
 module.exports = function socket (socket) {
   // create new config by merging config object from disk with config object from the request
   const socketConfig = Object.assign({}, baseSocketConfig, getValidatedRequestConfig(socket.handshake.query))
-  const credentials = getCredentials(socket.request.session)
+  const credentials = getCredentials(socket.handshake.query, socket.request.session)
   const hasCredentials = credentials.username && (credentials.userpassword || credentials.privatekey)
   const errorContext = { socket, credentials, socketConfig };
 
